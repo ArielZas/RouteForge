@@ -1,140 +1,118 @@
-RouteForger
+# RouteForger
 
-RouteForger is a small urban package-delivery route optimizer built around real geographic locations and road networks.
+RouteForger is a delivery-route optimizer for the Tel Aviv District. It
+geocodes real addresses, calculates travel times over OpenStreetMap roads, and
+uses beam search to order package pickups and deliveries.
 
-The first version focuses on a deliberately simple problem:
+The project includes a FastAPI backend, a Leaflet frontend, automated tests,
+and Docker Compose configuration.
 
-Given one courier and a predefined list of packages, calculate an efficient route that picks up and delivers every package while considering delivery deadlines.
+## Features
 
-V1 Scope
-One courier
-Unlimited courier capacity
-Package weight ignored
-All packages known in advance
-Packages loaded from a JSON file
-Input validation with Pydantic
-Real source/destination addresses
-Address geocoding
-Real road travel times/distances
-Route optimization
-Interactive map visualization
+- Real address geocoding and drivable road routes through OSMnx
+- Pickup-before-delivery constraints
+- Package deadlines and late-delivery tracking
+- Beam-search route optimization
+- Interactive map, stop sequence, route duration, and distance
+- Request validation and structured API errors
+- Dockerized frontend and backend
 
-Dynamic events, multiple couriers, capacity constraints, and manual package creation are intentionally left for later versions.
+## Current scope
 
-Input
+- One courier
+- One or more packages
+- Unlimited courier capacity
+- Addresses inside the Tel Aviv District
+- Static travel-time estimates without live traffic
 
-A delivery scenario is initially loaded from:
+Beam search keeps the optimizer practical for small scenarios, but it does not
+guarantee the optimal route or guarantee finding every possible solution.
 
-data/packages.json
+## Run with Docker
 
-Example:
+Requirements: Docker and internet access on the first run.
 
+```bash
+docker compose up --build
+```
+
+Then open:
+
+- Application: <http://localhost:5500>
+- API documentation: <http://localhost:8000/docs>
+- Health check: <http://localhost:8000/api/health>
+
+## Local development
+
+Requires Python 3.11 or newer.
+
+```bash
+python -m venv .venv
+python -m pip install -e ".[dev]"
+uvicorn routeforger.api.app:app --reload --port 8000
+```
+
+Run the tests with:
+
+```bash
+pytest
+```
+
+## API
+
+Calculate a route:
+
+```http
+POST /api/routes
+Content-Type: application/json
+```
+
+Example request:
+
+```json
 {
-  "courier_start": "Azrieli Center, Tel Aviv",
+  "couriers": [
+    {
+      "id": 1,
+      "start_address": "Azrieli Center, Tel Aviv",
+      "start_time": 21600
+    }
+  ],
   "packages": [
     {
       "id": 1,
-      "source": "Dizengoff 100, Tel Aviv",
-      "destination": "Bialik 20, Ramat Gan",
-      "deadline": "2026-08-11T14:00:00"
+      "source_address": "Dizengoff Center, Tel Aviv",
+      "destination_address": "Bialik 20, Ramat Gan",
+      "deadline": 32400
     }
   ]
 }
+```
 
-The JSON is parsed and validated before entering the routing logic.
+Times are seconds since midnight. The response includes route geometry,
+ordered stops, arrival times, total distance and duration, and each package's
+deadline status.
 
-Application Flow
-packages.json
-     ↓
-Parse + Validate
-     ↓
-DeliveryScenario
-     ↓
-Geocoding
-     ↓
-Road Routing Data
-     ↓
-Route Optimizer
-     ↓
-Optimized Route
-     ↓
-Frontend Map
-Project Structure
-routeforge/
-│
-├── backend/
-│   ├── src/
-│   │   └── routeforge/
-│   │       ├── __init__.py
-│   │       ├── main.py
-│   │       │
-│   │       ├── domain/
-│   │       │   ├── package.py
-│   │       │   ├── courier.py
-│   │       │   ├── route.py
-│   │       │   └── scenario.py
-│   │       │
-│   │       ├── input/
-│   │       │   └── json_loader.py
-│   │       │
-│   │       ├── services/
-│   │       │   ├── geocoding.py
-│   │       │   └── routing.py
-│   │       │
-│   │       ├── optimization/
-│   │       │   └── optimizer.py
-│   │       │
-│   │       └── api/
-│   │           └── # FastAPI added later
-│   │
-│   └── tests/
-│
-├── frontend/
-│   ├── index.html
-│   ├── app.js
-│   └── style.css
-│
-├── data/
-│   └── packages.json
-│
-├── README.md
-├── pyproject.toml
-└── .gitignore
-Architecture
+## How it works
 
-The backend contains all delivery logic:
+1. FastAPI validates the scenario.
+2. OSMnx maps addresses to road-network nodes.
+3. NetworkX calculates travel costs between relevant stops.
+4. Beam search selects a pickup and delivery order.
+5. The result is expanded into road geometry and displayed with Leaflet.
 
-input parsing
-validation
-domain models
-geocoding
-road-routing integration
-route optimization
+## Project structure
 
-The frontend is responsible only for visualization and future user interaction.
+```text
+backend/src/routeforger/   FastAPI, domain models, routing, and optimization
+backend/tests/             Backend test suite
+frontend/                  Leaflet browser interface
+data/scenario.json         Example command-line input
+compose.yml                Docker Compose configuration
+```
 
-The optimizer should not depend on how packages were provided.
+The file-based workflow is also available with:
 
-This allows future inputs such as:
-
-JSON file ──────┐
-FastAPI ────────┤
-Manual UI ──────┼──► DeliveryScenario ► Optimizer
-Map input ──────┘
-Future Extensions
-
-Possible later additions include:
-
-FastAPI server
-manual package entry
-selecting pickup/delivery locations directly on the map
-multiple couriers
-package weight and courier capacity
-dynamic package arrival
-traffic-aware re-optimization
-more advanced routing algorithms
-Goal
-
-The main engineering problem is:
-
-Find a valid and efficient route through real-world pickup and delivery locations while respecting pickup-before-delivery constraints and delivery deadlines.
+```bash
+python -m routeforger.main
+```

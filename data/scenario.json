@@ -1,0 +1,23 @@
+{
+  "couriers": [
+    {
+      "id": 1,
+      "start_address": "Azrieli Center, Tel Aviv",
+      "start_time": "06:00"
+    }
+  ],
+  "packages": [
+    {
+      "id": 1,
+      "source_address": "Dizengoff 100, Tel Aviv",
+      "destination_address": "Bialik 20, Ramat Gan",
+      "deadline": "09:00"
+    },
+    {
+      "id": 2,
+      "source_address": "Rothschild Boulevard 50, Tel Aviv",
+      "destination_address": "Abba Hillel Silver Road 7, Ramat Gan",
+      "deadline": "15:00"
+    }
+  ]
+}

@@ -1,1 +1,54 @@
-
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RouteForger</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3ynhYMe2uMZ6MV0sqX7t0XxGg0qE=" crossorigin="">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    #map { position: relative; overflow: hidden; }
+    .leaflet-pane, .leaflet-map-pane, .leaflet-tile-pane,
+    .leaflet-overlay-pane, .leaflet-shadow-pane, .leaflet-marker-pane,
+    .leaflet-tooltip-pane, .leaflet-popup-pane {
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+  </style>
+</head>
+<body>
+  <header><strong>RouteForger</strong><span id="api-status">Checking API…</span></header>
+  <main>
+    <section class="panel form-panel">
+      <p class="eyebrow">01 · PLAN</p><h1>Delivery details</h1>
+      <form id="route-form">
+        <h2>Courier</h2>
+        <div class="fields courier-fields">
+          <label>Start address<input id="start-address" value="Azrieli Center, Tel Aviv" required></label>
+          <label>Start time<input id="start-time" type="time" value="06:00" required></label>
+        </div>
+        <div class="package-heading"><h2>Packages <small id="package-count"></small></h2><button id="add-package" type="button">+ Add package</button></div>
+        <div id="package-list"></div>
+        <p id="error" class="error" hidden></p>
+        <button id="submit" class="submit" type="submit">Forge my route</button>
+      </form>
+    </section>
+    <section class="panel map-panel">
+      <p class="eyebrow">02 · ROUTE</p><h1>Your route</h1>
+      <div id="map" aria-label="Delivery route map"></div>
+      <div id="summary" class="summary" hidden>
+        <div><small>DISTANCE</small><strong id="distance"></strong></div>
+        <div><small>DURATION</small><strong id="duration"></strong></div>
+        <div><small>STOPS</small><strong id="stops"></strong></div>
+      </div>
+      <div id="details" class="details" hidden><div><h2>Stop sequence</h2><ol id="stop-list"></ol></div><div><h2>Package status</h2><div id="package-results"></div></div></div>
+    </section>
+  </main>
+  <template id="package-template">
+    <article class="package"><div class="package-title"><strong></strong><button type="button" class="remove">Remove</button></div><div class="fields package-fields"><label>Pickup address<input name="source" required></label><label>Delivery address<input name="destination" required></label><label>Deliver by<input name="deadline" type="time" required></label></div></article>
+  </template>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>

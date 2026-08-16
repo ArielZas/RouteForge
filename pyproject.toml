@@ -8,13 +8,20 @@ version = "0.1.0"
 description = "A small urban package-delivery route optimizer"
 readme = "README.MD"
 requires-python = ">=3.11"
-dependencies = ["pydantic>=2.0,<3.0"]
+dependencies = [
+    "fastapi>=0.115,<1.0",
+    "networkx",
+    "osmnx",
+    "pydantic>=2.0,<3.0",
+    "scikit-learn",
+    "uvicorn[standard]>=0.30,<1.0",
+]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["backend/src/routeforge"]
+packages = ["backend/src/routeforger"]
 
 [tool.pytest.ini_options]
 pythonpath = ["backend/src"]
